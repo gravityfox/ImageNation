@@ -1,0 +1,5 @@
+apply plugin: 'java'
+
+group 'net.gravityfox.imagenation'
+version '0.0.1'
+
