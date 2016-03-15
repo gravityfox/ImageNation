@@ -17,9 +17,9 @@ public class TypeCatalog {
             String.class,
             Color.class};
 
-    public static boolean isValid(Type type){
-        for(Type t: validTypes){
-            if(type.equals(t)) return true;
+    public static boolean isValid(Type type) {
+        for (Type t : validTypes) {
+            if (type.equals(t)) return true;
         }
         return false;
     }

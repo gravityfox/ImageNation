@@ -14,26 +14,16 @@ public class SimpleImage implements IImage {
     private BufferedImage image;
     private Pixel[][] pixels;
 
-
     public SimpleImage() {
         image = null;
         pixels = null;
     }
 
-    public void setBufferedImage(BufferedImage image) {
-        this.image = image;
-        int width = getWidth();
-        int height = getHeight();
-        pixels = new Pixel[width][height];
-
-        // loop through height rows from top to bottom
-        for (int x = 0; x < width; x++)
-            for (int y = 0; y < height; y++)
-                pixels[x][y] = new Pixel(this, x, y);
-    }
-
-    public void setPixels(Pixel[][] pixels) {
-        this.pixels = pixels;
+    public static BufferedImage copyBufferedImmage(BufferedImage bi) {
+        ColorModel colorModel = bi.getColorModel();
+        boolean isAlphaPremultiplied = colorModel.isAlphaPremultiplied();
+        WritableRaster raster = bi.copyData(null);
+        return new BufferedImage(colorModel, raster, isAlphaPremultiplied, null);
     }
 
     @Override
@@ -54,6 +44,18 @@ public class SimpleImage implements IImage {
     @Override
     public BufferedImage getBufferedImage() {
         return image;
+    }
+
+    public void setBufferedImage(BufferedImage image) {
+        this.image = image;
+        int width = getWidth();
+        int height = getHeight();
+        pixels = new Pixel[width][height];
+
+        // loop through height rows from top to bottom
+        for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++)
+                pixels[x][y] = new Pixel(this, x, y);
     }
 
     @Override
@@ -83,6 +85,10 @@ public class SimpleImage implements IImage {
         return pixelArray;
     }
 
+    public void setPixels(Pixel[][] pixels) {
+        this.pixels = pixels;
+    }
+
     @Override
     public Pixel[][] getPixels2D() {
         return pixels;
@@ -104,12 +110,5 @@ public class SimpleImage implements IImage {
             for (int y = 0; y < height; y++)
                 picPixels[x][y] = new Pixel(pic, this.pixels[x][y]);
         return pic;
-    }
-
-    static BufferedImage copyBufferedImmage(BufferedImage bi) {
-        ColorModel colorModel = bi.getColorModel();
-        boolean isAlphaPremultiplied = colorModel.isAlphaPremultiplied();
-        WritableRaster raster = bi.copyData(null);
-        return new BufferedImage(colorModel, raster, isAlphaPremultiplied, null);
     }
 }

@@ -1,6 +1,7 @@
 package apcsa;
 
 import apcsa.fractal.FractalDialog;
+import javafx.application.Platform;
 import javafx.stage.FileChooser;
 
 import javax.imageio.ImageIO;
@@ -123,23 +124,43 @@ public class INMenuBar extends JMenuBar {
         saveAs.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                FileChooser fc = new FileChooser();
-                fc.setTitle("Save Image As...");
-                FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("Image files", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp", "*.wbmp");
-                fc.getExtensionFilters().addAll(filter);
-                File file = fc.showSaveDialog(null);
-                if (file != null) {
-                    String[] parts = file.getName().split("\\.");
-                    String ext = parts.length > 0 ? parts[parts.length - 1] : "";
-                    /*if (!filter.) {
-                        ext = "png";
-                        file = new File(file.getAbsoluteFile() + ".png");
-                    }*/
+                if (frame.getPicture() != null) {
+                    FileChooser fc = new FileChooser();
+                    fc.setTitle("Save Image As...");
+                    fc.getExtensionFilters().addAll(
+                            new FileChooser.ExtensionFilter("Portable Network Graphic", "*.png"),
+                            new FileChooser.ExtensionFilter("JPEG", "*.jpg", "*.jpeg"),
+                            new FileChooser.ExtensionFilter("Graphics Interchange Format", "*.gif"),
+                            new FileChooser.ExtensionFilter("Bitmap", "*.bmp")
+                    );
+                    final File[] fileTemp = {null};
+
                     try {
-                        ImageIO.write(frame.getPicture().getBufferedImage(), ext, file);
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
+                        synchronized (fileTemp) {
+                            Platform.runLater(() -> {
+                                fileTemp[0] = fc.showSaveDialog(null);
+                                synchronized (fileTemp) {
+                                    fileTemp.notifyAll();
+                                }
+                            });
+                            fileTemp.wait();
+                        }
+                    } catch (InterruptedException ignored) {
                     }
+
+                    File file = fileTemp[0];
+                    if (file != null) {
+                        String[] parts = file.getName().split("\\.");
+                        String ext = parts.length > 0 ? parts[parts.length - 1] : "";
+                        try {
+                            ImageIO.write(frame.getPicture().getBufferedImage(), ext, file);
+                            frame.setFileName(file.getName());
+                        } catch (IOException e1) {
+                            e1.printStackTrace();
+                        }
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Please load an image first!", "Alert!", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });

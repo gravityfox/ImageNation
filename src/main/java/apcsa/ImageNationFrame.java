@@ -1,5 +1,7 @@
 package apcsa;
 
+import javafx.embed.swing.JFXPanel;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -72,6 +74,8 @@ public class ImageNationFrame extends JFrame {
      */
     private IImage picture;
 
+    private String fileName;
+
     /**
      * Undo stack for change history
      */
@@ -86,6 +90,11 @@ public class ImageNationFrame extends JFrame {
      * Constuctor for main frame. The entire GUI is constructed from start to finish here, before being shown.
      */
     public ImageNationFrame() {
+        // Initializes JavaFX Toolkit.
+        // This is important for making the JavaFX File chooser work properly,
+        // Since Swing/AWT isn't really supposed to play well with JavaFX.
+        new JFXPanel();
+
         this.init();
         this.construct();
         this.addListeners();
@@ -96,7 +105,17 @@ public class ImageNationFrame extends JFrame {
         this.setLocation((dim.width - this.getWidth()) / 2, (dim.height - this.getHeight()) / 2);
         this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
+        this.updateTitle();
         this.setVisible(true);
+    }
+
+    public static ImageNationFrame getInstance() {
+        return instance;
+    }
+
+    public static void main(String[] args) {
+        instance = new ImageNationFrame();
+
     }
 
     private void init() {
@@ -142,7 +161,6 @@ public class ImageNationFrame extends JFrame {
                         imagePanel.repaint();
                     } else {
                         JOptionPane.showMessageDialog(ImageNationFrame.this, "Please load an image first!", "Alert!", JOptionPane.ERROR_MESSAGE);
-                        //JOptionPane.showInputDialog(window, "Please enter paramater 1: ", "Data", JOptionPane.QUESTION_MESSAGE, null, new Object[]{"Test", "Hello"}, "Test");
                     }
                 }
             }
@@ -152,7 +170,9 @@ public class ImageNationFrame extends JFrame {
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON1) {
                     pushHistory();
-                    setBufferedImage(loadImage(images.getModel().getElementAt(images.locationToIndex(e.getPoint()))), true);
+                    String name = images.getModel().getElementAt(images.locationToIndex(e.getPoint()));
+                    setBufferedImage(loadImage(name), true);
+                    setFileName(name);
                 }
             }
         });
@@ -207,8 +227,13 @@ public class ImageNationFrame extends JFrame {
         SimpleImage picture = new CustomImage();
         picture.setBufferedImage(image);
         this.picture = picture;
-
         this.imagePanel.setImage(image, center);
+        this.updateTitle();
+    }
+
+    public void setFileName(String name) {
+        this.fileName = name;
+        this.updateTitle();
     }
 
     private BufferedImage loadImage(String name) {
@@ -224,6 +249,14 @@ public class ImageNationFrame extends JFrame {
             g.setFont(g.getFont().deriveFont(20f));
             g.drawString("Could not load \"" + name + "\"!", 20, 100);
             return img;
+        }
+    }
+
+    public void updateTitle() {
+        if (picture != null && fileName != null && !fileName.isEmpty()) {
+            this.setTitle("ImageNation - " + fileName + " - " + picture.getWidth() + "x" + picture.getHeight());
+        } else {
+            this.setTitle("ImageNation");
         }
     }
 
@@ -273,14 +306,5 @@ public class ImageNationFrame extends JFrame {
 
     public ImagePanel getImagePanel() {
         return imagePanel;
-    }
-
-    public static ImageNationFrame getInstance() {
-        return instance;
-    }
-
-    public static void main(String[] args) {
-        instance = new ImageNationFrame();
-
     }
 }
