@@ -9,6 +9,7 @@ import com.sun.prism.Graphics;
 
 import javafx.animation.Transition;
 import javafx.geometry.Dimension2D;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Region;
@@ -36,8 +37,8 @@ public class ImageNode extends Region {
         }
     }
 
-    /*public void paint() {
-        GraphicsContext g ;//= this.getGraphicsContext2D();
+    public void paint() {
+        GraphicsContext g = new Canvas().getGraphicsContext2D();//= this.getGraphicsContext2D();
         g.setFill(Color.DARKGRAY);
         g.fill();
         g.translate(this.getWidth() / 2, this.getHeight() / 2);
@@ -46,7 +47,7 @@ public class ImageNode extends Region {
         if (image != null) {
             g.drawImage(image, -this.getWidth() / 2, -this.getHeight() / 2);
         }
-    }*/
+    }
 
     public void centerImage() {
         this.transform = new Affine();
