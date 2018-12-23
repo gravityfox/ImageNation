@@ -1,9 +1,10 @@
 package apcsa.fractal;
 
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.text.NumberFormat;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 
 /**
  * Created by Fox on 3/1/2016.
@@ -40,31 +41,59 @@ public class FractalDialog extends JDialog {
         this.configPane.setBorder(new EmptyBorder(5, 5, 5, 5));
         this.getContentPane().add(configPane, BorderLayout.SOUTH);
         this.fractalPane.rebuffer();
-        realLowerField = new JFormattedTextField(NumberFormat.getNumberInstance());
-        realUpperField = new JFormattedTextField(NumberFormat.getNumberInstance());
-        imaginaryLowerField = new JFormattedTextField(NumberFormat.getNumberInstance());
-        imaginaryUpperField = new JFormattedTextField(NumberFormat.getNumberInstance());
-
+        this.realLowerField = new JFormattedTextField(NumberFormat.getNumberInstance());
+        this.realUpperField = new JFormattedTextField(NumberFormat.getNumberInstance());
+        this.imaginaryLowerField = new JFormattedTextField(NumberFormat.getNumberInstance());
+        this.imaginaryUpperField = new JFormattedTextField(NumberFormat.getNumberInstance());
+        this.fractal = new JComboBox();
+        this.colorScheme = new JComboBox();
     }
 
     private void configureLayout() {
         GridBagConstraints c = new GridBagConstraints();
-        c.gridx = 0;
         c.gridy = 0;
-        c.weightx = 0.25;
         c.weighty = 1;
         c.anchor = GridBagConstraints.CENTER;
         c.insets = new Insets(4, 4, 4, 4);
         c.ipadx = 4;
         c.ipady = 4;
         c.fill = GridBagConstraints.BOTH;
-        configPane.add(realLowerField, c);
-        c.gridx = 1;
-        configPane.add(realUpperField, c);
+        c.weightx = 0;
+        c.gridx = 0;
+        configPane.add(new JLabel("Real Lower:"), c);
         c.gridx = 2;
+        configPane.add(new JLabel("Real Upper:"), c);
+        c.gridy = 1;
+        c.gridx = 0;
+        configPane.add(new JLabel("Imaginary Lower:"), c);
+        c.gridx = 2;
+        configPane.add(new JLabel("Imaginary Upper:"), c);
+        c.weightx = 1;
+        c.gridy = 0;
+        c.gridx = 1;
+        configPane.add(realLowerField, c);
+        c.gridx = 3;
+        configPane.add(realUpperField, c);
+        c.gridy = 1;
+        c.gridx = 1;
         configPane.add(imaginaryLowerField, c);
         c.gridx = 3;
         configPane.add(imaginaryUpperField, c);
+
+        c.gridy = 2;
+        c.gridx = 0;
+        c.weightx = 0;
+        configPane.add(new JLabel("Fractal:"), c);
+        c.gridx = 1;
+        c.weightx = 1;
+        configPane.add(fractal, c);
+        c.gridx = 2;
+        c.weightx = 0;
+        configPane.add(new JLabel("ColorScheme:"), c);
+        c.gridx = 3;
+        c.weightx = 1;
+        configPane.add(colorScheme, c);
+
     }
 
     private void addListeners() {

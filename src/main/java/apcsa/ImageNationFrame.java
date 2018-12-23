@@ -1,26 +1,22 @@
 package apcsa;
 
-import javafx.embed.swing.JFXPanel;
-
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.event.MouseInputAdapter;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.MouseInputAdapter;
+
+import javafx.embed.swing.JFXPanel;
 
 /**
  * Main window of ImageNation, as well as the entry point.
@@ -42,11 +38,7 @@ public class ImageNationFrame extends JFrame {
     /**
      * Max size of the undo stack. Needed because undo states are not incremental, and therefore very large.
      */
-    private static final int UNDO_LIMIT = 20;
-    /**
-     * Path of images relative to this class
-     */
-    private static final String IMAGE_PATH = "../images";
+    private static final int UNDO_LIMIT = 50;
 
     /**
      * Static instance to the GUI frame
@@ -56,11 +48,13 @@ public class ImageNationFrame extends JFrame {
     /**
      * List of image names on the left of the GUI
      */
-    private JList<String> images;
+    private JList<String> imagesJList;
     /**
      * List of methods on the right side of the GUI. Wrapper is used to avoid using {@link Method#toString()}.
      */
-    private JList<Wrapper.Method> methods;
+    private JList<String> methodsJList;
+
+    private MethodCollection methods;
     /**
      * Menu Bar of the GUI. Holds most of the functionality access.
      */
@@ -121,40 +115,44 @@ public class ImageNationFrame extends JFrame {
     private void init() {
 
         this.getContentPane().setLayout(new BorderLayout());
-        List<String> pictures = getImages();
-        this.images = new JList<>(pictures.toArray(new String[pictures.size()]));
-        List<Wrapper.Method> methods = getMethods();
-        this.methods = new JList<>(methods.toArray(new Wrapper.Method[methods.size()]));
+        List<String> pictures = Reflections.getImages();
+        this.imagesJList = new JList<>(pictures.toArray(new String[pictures.size()]));
+        this.methods = Reflections.getMethods();
+        this.methodsJList = new JList<>(methods);
         this.menuBar = new INMenuBar(this);
         this.picture = null;
         this.imagePanel = new ImagePanel(null);
         this.undoStack = new LinkedList<>();
         this.redoStack = new LinkedList<>();
         this.menuBar.updateEnabled();
+
+        Reflections.getFractalClasses();
     }
 
     private void construct() {
-        this.images.setFont(images.getFont().deriveFont(14f));
-        this.images.setBorder(new EmptyBorder(10, 20, 10, 20));
-        this.images.setBackground(Color.LIGHT_GRAY);
-        this.getContentPane().add(images, BorderLayout.WEST);
-        this.methods.setBorder(new EmptyBorder(10, 20, 10, 20));
-        this.methods.setFont(methods.getFont().deriveFont(14f));
-        this.methods.setBackground(Color.LIGHT_GRAY);
-        this.getContentPane().add(methods, BorderLayout.EAST);
+        this.imagesJList.setFont(imagesJList.getFont().deriveFont(14f));
+        this.imagesJList.setBorder(new EmptyBorder(10, 20, 10, 20));
+        this.imagesJList.setBackground(Color.LIGHT_GRAY);
+        this.getContentPane().add(new JScrollPane(imagesJList), BorderLayout.WEST);
+        this.methodsJList.setBorder(new EmptyBorder(10, 20, 10, 20));
+        this.methodsJList.setFont(methodsJList.getFont().deriveFont(14f));
+        this.methodsJList.setBackground(Color.LIGHT_GRAY);
+        this.getContentPane().add(new JScrollPane(methodsJList), BorderLayout.EAST);
         this.getContentPane().add(imagePanel, BorderLayout.CENTER);
         this.setJMenuBar(this.menuBar);
     }
 
     private void addListeners() {
-        this.methods.addMouseListener(new MouseInputAdapter() {
+        this.methodsJList.addMouseListener(new MouseInputAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON1) {
                     if (picture != null) {
                         pushHistory();
                         try {
-                            methods.getModel().getElementAt(methods.locationToIndex(e.getPoint())).get().invoke(picture);
+                            String name = methodsJList.getModel().getElementAt(methodsJList.locationToIndex(e.getPoint()));
+                            String[] nameModified = name.split("\\.\\.\\.");
+                            methods.invokeMethod(picture, nameModified[0], ImageNationFrame.this);
                         } catch (IllegalAccessException | InvocationTargetException e1) {
                             e1.printStackTrace();
                         }
@@ -165,12 +163,12 @@ public class ImageNationFrame extends JFrame {
                 }
             }
         });
-        this.images.addMouseListener(new MouseInputAdapter() {
+        this.imagesJList.addMouseListener(new MouseInputAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON1) {
                     pushHistory();
-                    String name = images.getModel().getElementAt(images.locationToIndex(e.getPoint()));
+                    String name = imagesJList.getModel().getElementAt(imagesJList.locationToIndex(e.getPoint()));
                     setBufferedImage(loadImage(name), true);
                     setFileName(name);
                 }
@@ -194,40 +192,11 @@ public class ImageNationFrame extends JFrame {
         });
     }
 
-    private List<Wrapper.Method> getMethods() {
-        List<Wrapper.Method> list = new ArrayList<>();
-        for (Method method : CustomImage.class.getDeclaredMethods()) {
-            Class<?>[] parameters = method.getParameterTypes();
-            if (!Modifier.isStatic(method.getModifiers())
-                    && Modifier.isPublic(method.getModifiers())
-                    && parameters.length == 0
-                    && method.getReturnType().equals(Void.TYPE)) {
-                list.add(new Wrapper.Method(method));
-            }
-        }
-        Collections.sort(list);
-        return list;
-    }
-
-    private List<String> getImages() {
-        List<String> list = new ArrayList<>();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(IMAGE_PATH)));
-        String filename;
-        try {
-            while ((filename = reader.readLine()) != null) {
-                list.add(filename);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-
     private void setBufferedImage(BufferedImage image, boolean center) {
         SimpleImage picture = new CustomImage();
         picture.setBufferedImage(image);
         this.picture = picture;
-        this.imagePanel.setImage(image, center);
+        this.imagePanel.setImage(picture, center);
         this.updateTitle();
     }
 
@@ -238,7 +207,7 @@ public class ImageNationFrame extends JFrame {
 
     private BufferedImage loadImage(String name) {
         try {
-            return ImageIO.read(this.getClass().getResource(IMAGE_PATH + "/" + name));
+            return ImageIO.read(this.getClass().getResource(Reflections.IMAGE_PATH + "/" + name));
         } catch (IOException | IllegalArgumentException e) {
             e.printStackTrace();
             BufferedImage img = new BufferedImage(500, 200, BufferedImage.TYPE_INT_ARGB);
@@ -307,4 +276,5 @@ public class ImageNationFrame extends JFrame {
     public ImagePanel getImagePanel() {
         return imagePanel;
     }
+
 }

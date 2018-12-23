@@ -1,7 +1,5 @@
 package apcsa.javafx;
 
-import apcsa.Wrapper;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -56,7 +54,7 @@ public class ImageNationApp extends Application {
 
     private ListView<String> images;
 
-    private ListView<Wrapper.Method> methods;
+    //private ListView<Wrapper.Method> methods;
 
     private ImageNode imageNode;
 
@@ -116,7 +114,7 @@ public class ImageNationApp extends Application {
                     if (picture != null) {
                         pushHistory();
                         try {
-                           cell.getItem().get().invoke(picture);
+                            cell.getItem().get().invoke(picture);
                         } catch (IllegalAccessException | InvocationTargetException e1) {
                             e1.printStackTrace();
                         }
@@ -165,7 +163,7 @@ public class ImageNationApp extends Application {
 
     }
 
-    private List<Wrapper.Method> getMethods() {
+   /* private List<Wrapper.Method> getMethods() {
         List<Wrapper.Method> list = new ArrayList<>();
         for (Method method : FXCustomImage.class.getDeclaredMethods()) {
             Class<?>[] parameters = method.getParameterTypes();
@@ -178,7 +176,7 @@ public class ImageNationApp extends Application {
         }
         Collections.sort(list);
         return list;
-    }
+    }*/
 
     private List<String> getImages() {
         List<String> list = new ArrayList<>();

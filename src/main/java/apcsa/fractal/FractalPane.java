@@ -23,7 +23,7 @@ public class FractalPane extends JPanel {
             bufferedImage = new BufferedImage(this.getWidth(), this.getHeight(), BufferedImage.TYPE_INT_ARGB);
             for (int i = 0; i < bufferedImage.getWidth(); i++) {
                 for (int j = 0; j < bufferedImage.getHeight(); j++) {
-                    bufferedImage.setRGB(i, j, 0xffff0000);
+                    bufferedImage.setRGB(i, j, 0xff333333);
                 }
             }
         }
