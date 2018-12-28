@@ -64,7 +64,51 @@ public class CustomImage extends SimpleImage {
         }
     }
 
-    public void flip() {
-
+    @ParamNames({"Hue", "Chroma"})
+    public void number(double hue, double testvar) {
+        for (int x = 0; x < this.getWidth(); x++) {
+            for (int y = 0; y < this.getHeight(); y++) {
+                Pixel p = this.getPixel(x, y);
+                p.setHue(hue);
+            }
+        }
     }
+
+    public void string(String test) {
+        System.out.println(test);
+    }
+
+    public void mirror() {
+        for (int x = 0; x < this.getWidth() / 2; x++) {
+            for (int y = 0; y < this.getHeight(); y++) {
+                Pixel p = this.getPixel(x, y);
+                Pixel p2 = this.getPixel(this.getWidth() - x - 1, y);
+                p2.setRed(p.getRed());
+                p2.setGreen(p.getGreen());
+                p2.setBlue(p.getBlue());
+            }
+        }
+    }
+
+    @ParamNames({"Width", "Height"})
+    public void canvas(int width, int height) {
+        Pixel[][] newPixels = new Pixel[width][height];
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                newPixels[x][y] = new Pixel(null, x, y).setAlpha(1).setLightness(1);
+            }
+        }
+        setPixels(newPixels);
+    }
+
+    public void pastel() {
+        for (int x = 0; x < this.getWidth(); x++) {
+            for (int y = 0; y < this.getHeight(); y++) {
+                Pixel p = this.getPixel(x, y);
+                p.setSaturation(p.getSaturation() / 2);
+                p.setValue(p.getValue() / 2 + 0.5);
+            }
+        }
+    }
+
 }

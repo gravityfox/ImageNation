@@ -1,5 +1,7 @@
 package apcsa;
 
+import java.awt.*;
+
 /**
  * Created by Fox on 1/31/2016.
  * Project: SandBox
@@ -33,7 +35,8 @@ public class Pixel {
         this.mode = Mode.RGB;
         this.mode2 = Mode.Hx.S;
         this.mode3 = Mode.Hx.Sx.V;
-        int argb = picture.getBasicPixel(x, y);
+        int argb = 0;
+        if (picture != null) argb = picture.getBasicPixel(x, y);
         this.alpha = (double) ((argb >> 24) & 0xFF) / 255;
         this.red = (double) ((argb >> 16) & 0xFF) / 255;
         this.green = (double) ((argb >> 8) & 0xFF) / 255;
@@ -64,109 +67,174 @@ public class Pixel {
         return alpha;
     }
 
-    public void setAlpha(double alpha) {
+    public Pixel setAlpha(double alpha) {
         this.alpha = alpha;
         update();
+        return this;
     }
 
     public double getRed() {
         return red;
     }
 
-    public void setRed(double red) {
+    public Pixel setRed(double red) {
         this.red = red;
         mode = Mode.RGB;
         update();
+        return this;
     }
 
     public double getGreen() {
         return green;
     }
 
-    public void setGreen(double green) {
+    public Pixel setGreen(double green) {
         this.green = green;
         mode = Mode.RGB;
         update();
+        return this;
     }
 
     public double getBlue() {
         return blue;
     }
 
-    public void setBlue(double blue) {
+    public Pixel setBlue(double blue) {
         this.blue = blue;
         mode = Mode.RGB;
         update();
+        return this;
     }
 
     public double getHue() {
         return hue;
     }
 
-    public void setHue(double hue) {
+    public Pixel setHue(double hue) {
         while (hue < 0) {
             hue += 360;
         }
         this.hue = hue % 360;
         mode = Mode.H;
         update();
+        return this;
     }
 
     public double getSaturation() {
         return saturation;
     }
 
-    public void setSaturation(double saturation) {
+    public Pixel setSaturation(double saturation) {
         this.saturation = saturation;
         mode = Mode.H;
         mode2 = Mode.Hx.S;
         update();
+        return this;
     }
 
     public double getLightness() {
         return lightness;
     }
 
-    public void setLightness(double lightness) {
+    public Pixel setLightness(double lightness) {
         this.lightness = lightness;
         mode = Mode.H;
         mode2 = Mode.Hx.S;
         mode3 = Mode.Hx.Sx.L;
         update();
+        return this;
     }
 
     public double getValue() {
         return value;
     }
 
-    public void setValue(double value) {
+    public Pixel setValue(double value) {
         this.value = value;
         mode = Mode.H;
         mode2 = Mode.Hx.S;
         mode3 = Mode.Hx.Sx.V;
         update();
+        return this;
     }
 
     public double getChroma() {
         return chroma;
     }
 
-    public void setChroma(double chroma) {
+    public Pixel setChroma(double chroma) {
         this.chroma = chroma;
         mode = Mode.H;
         mode2 = Mode.Hx.CL;
         update();
+        return this;
     }
 
     public double getLuma() {
         return luma;
     }
 
-    public void setLuma(double luma) {
+    public Pixel setLuma(double luma) {
         this.luma = luma;
         mode = Mode.H;
         mode2 = Mode.Hx.CL;
         update();
+        return this;
+    }
+
+    public Pixel setToPixel(Pixel pixel) {
+        this.mode = pixel.mode;
+        this.mode2 = pixel.mode2;
+        this.mode3 = pixel.mode3;
+        this.alpha = pixel.alpha;
+        this.red = pixel.red;
+        this.green = pixel.green;
+        this.blue = pixel.blue;
+        this.hue = pixel.hue;
+        this.saturation = pixel.saturation;
+        this.lightness = pixel.lightness;
+        this.value = pixel.value;
+        this.chroma = pixel.chroma;
+        this.luma = pixel.luma;
+        update();
+        return this;
+    }
+
+    public Pixel copy() {
+        return new Pixel(null, this);
+    }
+
+    public Pixel invertRGB() {
+        this.red = 1 - this.red;
+        this.green = 1 - this.green;
+        this.blue = 1 - this.blue;
+        mode = Mode.RGB;
+        update();
+        return this;
+    }
+
+    public Pixel toContrastingBW() {
+        lightness = 1 - Math.round((2 * lightness + luma) / 3);
+        mode = Mode.H;
+        mode2 = Mode.Hx.S;
+        mode3 = Mode.Hx.Sx.L;
+        update();
+        return this;
+    }
+
+    public Color toAWTColor() {
+        return new Color((int) Math.max(0, Math.min(255, Math.round(red * 255))),
+                (int) Math.max(0, Math.min(255, Math.round(green * 255))),
+                (int) Math.max(0, Math.min(255, Math.round(blue * 255))),
+                (int) Math.max(0, Math.min(255, Math.round(alpha * 255))));
+    }
+
+    public int toIntColor() {
+        int a = (int) Math.max(0, Math.min(255, Math.round(alpha * 255)));
+        int r = (int) Math.max(0, Math.min(255, Math.round(red * 255)));
+        int g = (int) Math.max(0, Math.min(255, Math.round(green * 255)));
+        int b = (int) Math.max(0, Math.min(255, Math.round(blue * 255)));
+        return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
     private void update() {
@@ -267,11 +335,12 @@ public class Pixel {
             }
 
         }
-        r = (int) Math.max(0, Math.min(255, Math.round(red * 255)));
-        g = (int) Math.max(0, Math.min(255, Math.round(green * 255)));
-        b = (int) Math.max(0, Math.min(255, Math.round(blue * 255)));
-
-        picture.setBasicPixel(x, y, (a << 24) | (r << 16) | (g << 8) | b);
+        if (picture != null) {
+            r = (int) Math.max(0, Math.min(255, Math.round(red * 255)));
+            g = (int) Math.max(0, Math.min(255, Math.round(green * 255)));
+            b = (int) Math.max(0, Math.min(255, Math.round(blue * 255)));
+            picture.setBasicPixel(x, y, (a << 24) | (r << 16) | (g << 8) | b);
+        }
     }
 
     @Override

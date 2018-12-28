@@ -23,9 +23,15 @@ public interface IImage {
 
     Pixel getPixel(int x, int y); // get the pixel information as an object
 
+    Pixel getPixelCopy(int x, int y);
+
     Pixel[] getPixels(); // get all pixels in row-major order
 
     Pixel[][] getPixels2D(); // get 2-D array of pixels in row-major order
+
+    Pixel[] getPixelsCopy();
+
+    Pixel[][] getPixels2DCopy();
 
     boolean write(String fileName); // write out a file
 

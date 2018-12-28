@@ -9,7 +9,7 @@ import java.awt.image.WritableRaster;
  * Created by Fox on 1/31/2016.
  * Project: SandBox
  */
-public class SimpleImage implements IImage {
+public abstract class SimpleImage implements IImage {
 
     private BufferedImage image;
     private Pixel[][] pixels;
@@ -17,13 +17,6 @@ public class SimpleImage implements IImage {
     public SimpleImage() {
         image = null;
         pixels = null;
-    }
-
-    public static BufferedImage copyBufferedImmage(BufferedImage bi) {
-        ColorModel colorModel = bi.getColorModel();
-        boolean isAlphaPremultiplied = colorModel.isAlphaPremultiplied();
-        WritableRaster raster = bi.copyData(null);
-        return new BufferedImage(colorModel, raster, isAlphaPremultiplied, null);
     }
 
     @Override
@@ -74,6 +67,11 @@ public class SimpleImage implements IImage {
     }
 
     @Override
+    public Pixel getPixelCopy(int x, int y) {
+        return getPixel(x, y).copy();
+    }
+
+    @Override
     public Pixel[] getPixels() {
         int width = getWidth();
         int height = getHeight();
@@ -85,13 +83,49 @@ public class SimpleImage implements IImage {
         return pixelArray;
     }
 
+    @Override
+    public Pixel[] getPixelsCopy() {
+        int width = getWidth();
+        int height = getHeight();
+        Pixel[] pixelArray = new Pixel[width * height];
+        for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++)
+                pixelArray[y * width + x] = pixels[x][y].copy();
+
+        return pixelArray;
+    }
+
     public void setPixels(Pixel[][] pixels) {
-        this.pixels = pixels;
+        int height = 0;
+        for (Pixel[] pixel : pixels) {
+            height = Math.max(height, pixel.length);
+        }
+        image = new BufferedImage(pixels.length, height, BufferedImage.TYPE_INT_ARGB);
+        for (int x = 0; x < pixels.length; x++) {
+            for (int y = 0; y < pixels[x].length; y++) {
+                Pixel p = pixels[x][y];
+                if(p != null){
+                    image.setRGB(x, y, p.toIntColor());
+                }
+            }
+        }
     }
 
     @Override
     public Pixel[][] getPixels2D() {
         return pixels;
+    }
+
+    @Override
+    public Pixel[][] getPixels2DCopy() {
+        int width = getWidth();
+        int height = getHeight();
+        Pixel[][] pixelArray = new Pixel[width][height];
+        for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++)
+                pixelArray[x][y] = pixels[x][y].copy();
+
+        return pixelArray;
     }
 
     @Override
@@ -110,5 +144,12 @@ public class SimpleImage implements IImage {
             for (int y = 0; y < height; y++)
                 picPixels[x][y] = new Pixel(pic, this.pixels[x][y]);
         return pic;
+    }
+
+    public static BufferedImage copyBufferedImmage(BufferedImage bi) {
+        ColorModel colorModel = bi.getColorModel();
+        boolean isAlphaPremultiplied = colorModel.isAlphaPremultiplied();
+        WritableRaster raster = bi.copyData(null);
+        return new BufferedImage(colorModel, raster, isAlphaPremultiplied, null);
     }
 }
