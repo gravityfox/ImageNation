@@ -1,4 +1,4 @@
-package apcsa.fractal;
+package apcsa.gui;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,9 +1,6 @@
 package apcsa.gui;
 
 import apcsa.ImageNationFrame;
-import apcsa.fractal.FractalDialog;
-import javafx.application.Platform;
-import javafx.stage.FileChooser;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -24,6 +21,7 @@ public class INMenuBar extends JMenuBar {
     private JMenu file;
     private JMenuItem newCanvas;
     private JMenuItem newFractal;
+    private JMenuItem open;
     private JMenuItem saveAs;
 
     private JMenu edit;
@@ -52,6 +50,7 @@ public class INMenuBar extends JMenuBar {
         file = new JMenu("File");
         newCanvas = new JMenuItem("New Canvas...");
         newFractal = new JMenuItem("New Fractal...");
+        open = new JMenuItem("Open...");
         saveAs = new JMenuItem("Save As...");
 
         edit = new JMenu("Edit");
@@ -67,6 +66,7 @@ public class INMenuBar extends JMenuBar {
         this.add(file);
         file.add(newCanvas);
         file.add(newFractal);
+        file.add(open);
         file.add(saveAs);
 
         this.add(edit);
@@ -86,6 +86,8 @@ public class INMenuBar extends JMenuBar {
         newCanvas.setAccelerator(KeyStroke.getKeyStroke(VK_N, CTRL_DOWN_MASK));
         newFractal.setMnemonic(VK_F);
         newFractal.setAccelerator(KeyStroke.getKeyStroke(VK_N, CTRL_DOWN_MASK | SHIFT_DOWN_MASK));
+        open.setMnemonic(VK_O);
+        open.setAccelerator(KeyStroke.getKeyStroke(VK_O, CTRL_DOWN_MASK));
         saveAs.setMnemonic(VK_S);
         saveAs.setAccelerator(KeyStroke.getKeyStroke(VK_S, CTRL_DOWN_MASK));
 
@@ -134,34 +136,27 @@ public class INMenuBar extends JMenuBar {
                 FractalDialog dialog = new FractalDialog(frame, "Fractal Generator");
             }
         });
+        open.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                File file = FileDialogUtil.openImage();
+                if (file != null) {
+                    try {
+                        frame.openImage(file.toURI().toURL(), file.getName());
+                        frame.setFileName(file.getName());
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Not a valid file!", "Error!", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
         saveAs.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (frame.getPicture() != null) {
-                    FileChooser fc = new FileChooser();
-                    fc.setTitle("Save Image As...");
-                    fc.getExtensionFilters().addAll(
-                            new FileChooser.ExtensionFilter("Portable Network Graphic", "*.png"),
-                            new FileChooser.ExtensionFilter("JPEG", "*.jpg", "*.jpeg"),
-                            new FileChooser.ExtensionFilter("Graphics Interchange Format", "*.gif"),
-                            new FileChooser.ExtensionFilter("Bitmap", "*.bmp")
-                    );
-                    final File[] fileTemp = {null};
-
-                    try {
-                        synchronized (fileTemp) {
-                            Platform.runLater(() -> {
-                                fileTemp[0] = fc.showSaveDialog(null);
-                                synchronized (fileTemp) {
-                                    fileTemp.notifyAll();
-                                }
-                            });
-                            fileTemp.wait();
-                        }
-                    } catch (InterruptedException ignored) {
-                    }
-
-                    File file = fileTemp[0];
+                    File file = FileDialogUtil.saveImage(frame.getFileName());
                     if (file != null) {
                         String[] parts = file.getName().split("\\.");
                         String ext = parts.length > 0 ? parts[parts.length - 1] : "";

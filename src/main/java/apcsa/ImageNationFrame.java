@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -215,9 +216,21 @@ public class ImageNationFrame extends JFrame {
         this.updateTitle();
     }
 
-    private BufferedImage loadImage(String name) {
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void openImage(URL url, String failName){
+        this.setBufferedImage(this.loadImage(url, failName), true);
+    }
+
+    private BufferedImage loadImage(String name){
+        return this.loadImage(this.getClass().getResource(Reflections.IMAGE_PATH + "/" + name), name);
+    }
+
+    private BufferedImage loadImage(URL url, String failName) {
         try {
-            return ImageIO.read(this.getClass().getResource(Reflections.IMAGE_PATH + "/" + name));
+            return ImageIO.read(url);
         } catch (IOException | IllegalArgumentException e) {
             e.printStackTrace();
             BufferedImage img = new BufferedImage(500, 200, BufferedImage.TYPE_INT_ARGB);
@@ -226,7 +239,7 @@ public class ImageNationFrame extends JFrame {
             g.fillRect(0, 0, img.getWidth(), img.getHeight());
             g.setColor(Color.WHITE);
             g.setFont(g.getFont().deriveFont(20f));
-            g.drawString("Could not load \"" + name + "\"!", 20, 100);
+            g.drawString("Could not load \"" + failName + "\"!", 20, 100);
             return img;
         }
     }

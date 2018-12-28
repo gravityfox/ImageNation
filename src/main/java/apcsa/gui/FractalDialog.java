@@ -1,4 +1,4 @@
-package apcsa.fractal;
+package apcsa.gui;
 
 import java.awt.*;
 import java.text.NumberFormat;
