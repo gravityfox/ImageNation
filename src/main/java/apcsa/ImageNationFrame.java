@@ -16,6 +16,8 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.MouseInputAdapter;
 
+import apcsa.gui.INMenuBar;
+import apcsa.gui.ImagePanel;
 import javafx.embed.swing.JFXPanel;
 
 /**
@@ -108,8 +110,15 @@ public class ImageNationFrame extends JFrame {
     }
 
     public static void main(String[] args) {
-        instance = new ImageNationFrame();
 
+        EventQueue.invokeLater(() -> {
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+            }
+
+            instance = new ImageNationFrame();
+        });
     }
 
     private void init() {
@@ -130,13 +139,14 @@ public class ImageNationFrame extends JFrame {
     }
 
     private void construct() {
+        Color listColor = new Color(210,210,210);
         this.imagesJList.setFont(imagesJList.getFont().deriveFont(14f));
-        this.imagesJList.setBorder(new EmptyBorder(10, 20, 10, 20));
-        this.imagesJList.setBackground(Color.LIGHT_GRAY);
+        this.imagesJList.setBorder(new EmptyBorder(10, 15, 10, 15));
+        this.imagesJList.setBackground(listColor);
         this.getContentPane().add(new JScrollPane(imagesJList), BorderLayout.WEST);
-        this.methodsJList.setBorder(new EmptyBorder(10, 20, 10, 20));
+        this.methodsJList.setBorder(new EmptyBorder(10, 15, 10, 15));
         this.methodsJList.setFont(methodsJList.getFont().deriveFont(14f));
-        this.methodsJList.setBackground(Color.LIGHT_GRAY);
+        this.methodsJList.setBackground(listColor);
         this.getContentPane().add(new JScrollPane(methodsJList), BorderLayout.EAST);
         this.getContentPane().add(imagePanel, BorderLayout.CENTER);
         this.setJMenuBar(this.menuBar);
@@ -237,6 +247,7 @@ public class ImageNationFrame extends JFrame {
         return !redoStack.isEmpty();
     }
 
+    @SuppressWarnings("Duplicates")
     public void undo() {
         if (!undoStack.isEmpty()) {
             IImage pic = undoStack.pop();
@@ -248,6 +259,7 @@ public class ImageNationFrame extends JFrame {
         menuBar.updateEnabled();
     }
 
+    @SuppressWarnings("Duplicates")
     public void redo() {
         if (!redoStack.isEmpty()) {
             IImage pic = redoStack.pop();

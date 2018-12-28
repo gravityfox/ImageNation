@@ -1,4 +1,7 @@
-package apcsa;
+package apcsa.gui;
+
+import apcsa.IImage;
+import apcsa.Pixel;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -23,8 +26,13 @@ public class ImagePanel extends JPanel {
 
     private IImage image;
     private Dimension size;
+    private boolean overlay = true;
+    private Color overlayColor;
+
     private double rotation = 0;
     private AffineTransform transform = new AffineTransform();
+
+    private boolean renderMouse;
     private int mouseX, mouseY;
     private int mouseXImage, mouseYImage;
 
@@ -44,15 +52,16 @@ public class ImagePanel extends JPanel {
                 AffineTransform temp = (AffineTransform) transform.clone();
                 int mx = e.getX(), my = e.getY();
                 AffineTransform shift = new AffineTransform(), scale = new AffineTransform();
-                shift.translate(-mx + frame.width / 2, -my + frame.height / 2);
+                shift.translate(-mx + (float)frame.width / 2, -my + (float)frame.height / 2);
                 scale.scale(delta, delta);
                 temp.preConcatenate(shift);
                 temp.preConcatenate(scale);
-                shift.setToTranslation(mx - frame.width / 2, my - frame.height / 2);
+                shift.setToTranslation(mx - (float) frame.width / 2, my - (float) frame.height / 2);
                 temp.preConcatenate(shift);
                 if (temp.getScaleX() > 0.1 && temp.getScaleX() < 500) transform = temp;
                 mouseX = e.getX();
                 mouseY = e.getY();
+                renderMouse = true;
                 computeMousePositionRelativeToImage();
                 ImagePanel.this.repaint();
             }
@@ -72,36 +81,30 @@ public class ImagePanel extends JPanel {
                     AffineTransform shift = new AffineTransform();
                     shift.translate(x, y);
                     transform.preConcatenate(shift);
-
-                    this.lastX = e.getX();
-                    this.lastY = e.getY();
-                    mouseX = e.getX();
-                    mouseY = e.getY();
-                    computeMousePositionRelativeToImage();
-                    ImagePanel.this.repaint();
-                } else {
-                    this.lastX = e.getX();
-                    this.lastY = e.getY();
-                    mouseX = e.getX();
-                    mouseY = e.getY();
-                    computeMousePositionRelativeToImage();
-                    ImagePanel.this.repaint();
                 }
+                this.lastX = e.getX();
+                this.lastY = e.getY();
+                mouseX = e.getX();
+                mouseY = e.getY();
+                renderMouse = true;
+                computeMousePositionRelativeToImage();
+                ImagePanel.this.repaint();
             }
 
             @Override
             public void mouseMoved(MouseEvent e) {
                 mouseX = e.getX();
                 mouseY = e.getY();
+                renderMouse = true;
                 computeMousePositionRelativeToImage();
                 ImagePanel.this.repaint();
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                mouseX = -1;
-                mouseY = -1;
-                computeMousePositionRelativeToImage();
+//                mouseX = -1;
+//                mouseY = -1;
+                renderMouse = false;
                 ImagePanel.this.repaint();
             }
         };
@@ -153,7 +156,7 @@ public class ImagePanel extends JPanel {
                 }
                 g.drawImage(image.getImage(), -size.width / 2, -size.height / 2, this);
             } else return;
-            if (mouseX == -1 || mouseY == -1) return;
+            if (!renderMouse|| !overlay) return;
             AffineTransform imageShift = new AffineTransform();
             imageShift.translate(size.width / 2, size.height / 2);
             try {
@@ -179,7 +182,7 @@ public class ImagePanel extends JPanel {
             g.drawLine((int) clipBounds.getMinX(), ym, x1, ym);
             g.drawLine(x2, ym, (int) clipBounds.getMaxX(), ym);
             g2.setRenderingHint(KEY_TEXT_ANTIALIASING, VALUE_TEXT_ANTIALIAS_ON);
-            g2.setFont(new Font("calibri", Font.PLAIN, 18));
+            g2.setFont(new Font("helvetica", Font.PLAIN, 18));
             String str;
             str = "X: " + mouseXImage;
             g2.drawString(str, Math.max(x2 + 8, (int) clipBounds.getWidth() - 8 - g2.getFontMetrics().stringWidth(str)), ym + 24);
@@ -209,13 +212,12 @@ public class ImagePanel extends JPanel {
                 }
             }
         } finally {
-            mouseX = -1;
-            mouseY = -1;
+            renderMouse = false;
         }
     }
 
     private void computeMousePositionRelativeToImage() {
-        if (image == null || mouseX == -1 || mouseY == -1) return;
+        if (image == null || !renderMouse || mouseX == -1 || mouseY == -1) return;
         Dimension rect = this.getSize();
         AffineTransform mapping = new AffineTransform();
         mapping.translate(rect.width / 2, rect.height / 2);
@@ -237,5 +239,25 @@ public class ImagePanel extends JPanel {
 
     private static String f(double val) {
         return String.format("%.3f", val);
+    }
+
+    public boolean isOverlayEnabled() {
+        return overlay;
+    }
+
+    public void setOverlay(boolean overlay) {
+        this.overlay = overlay;
+        this.renderMouse = true;
+        this.repaint();
+    }
+
+    public Color getOverlayColor() {
+        return overlayColor;
+    }
+
+    public void setOverlayColor(Color overlayColor) {
+        this.overlayColor = overlayColor;
+        this.renderMouse = true;
+        this.repaint();
     }
 }

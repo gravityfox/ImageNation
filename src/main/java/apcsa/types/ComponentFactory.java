@@ -1,18 +1,14 @@
 package apcsa.types;
 
-import apcsa.ParamNames;
-
+import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-
-import javax.swing.*;
 
 /**
  * Created by Fox on 3/18/2016.
@@ -20,8 +16,10 @@ import javax.swing.*;
  */
 public class ComponentFactory {
 
-    public static IParameterComponent createComponent(Parameter parameter, String name){
-        if(name == null || name.isEmpty()) name = parameter.getName();
+    private static final Border PAR_BORDER = BorderFactory.createEmptyBorder(4, 4, 4, 4);
+
+    public static IParameterComponent createComponent(Parameter parameter, String name) {
+        if (name == null || name.isEmpty()) name = parameter.getName();
 
         if (!TypeCatalog.isValidParameter(parameter.getType()))
             throw new IllegalArgumentException("Parameter \"" + parameter.getName() + "\" of type \"" + parameter.getType() + "\" is not supported!");
@@ -43,20 +41,13 @@ public class ComponentFactory {
         return null;
     }
 
-    public static List<IParameterComponent> createComponents(Method method){
+    public static List<IParameterComponent> createComponents(Method method) {
         List<IParameterComponent> list = new ArrayList<>();
-        String[] names = new String[method.getParameterCount()];
-        Annotation[] annotations = method.getDeclaredAnnotations();
-        for(Annotation a : annotations){
-            if(a instanceof ParamNames){
-                String[] n = ((ParamNames) a).value();
-                System.arraycopy(n, 0, names, 0, Math.min(n.length, names.length));
-                break;
-            }
-        }
-        Iterator<String> namesIt = Arrays.asList(names).iterator();
-        for(Parameter p : method.getParameters()){
-            list.add(createComponent(p, (namesIt.hasNext() ? namesIt.next() : null)));
+        List<String> names = Signatures.getParameterNames(method);
+
+        Iterator<String> namesIt = names.iterator();
+        for (Parameter p : method.getParameters()) {
+            list.add(createComponent(p, (namesIt.hasNext() ? namesIt.next() : p.getName())));
         }
         return list;
     }
@@ -71,7 +62,7 @@ public class ComponentFactory {
                 pane = new JPanel();
                 pane.setLayout(new BoxLayout(pane, BoxLayout.X_AXIS));
                 pane.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
-                pane.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+                pane.setBorder(PAR_BORDER);
                 pane.add(new JLabel("Byte - " + name + ":"));
                 number = new JFormattedTextField(NumberFormat.getIntegerInstance());
                 number.setMinimumSize(new Dimension(60, 20));
@@ -110,7 +101,7 @@ public class ComponentFactory {
                 pane = new JPanel();
                 pane.setLayout(new BoxLayout(pane, BoxLayout.X_AXIS));
                 pane.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
-                pane.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+                pane.setBorder(PAR_BORDER);
                 pane.add(new JLabel("Short - " + name + ":"));
                 number = new JFormattedTextField(NumberFormat.getIntegerInstance());
                 number.setMinimumSize(new Dimension(60, 20));
@@ -148,7 +139,7 @@ public class ComponentFactory {
                 pane = new JPanel();
                 pane.setLayout(new BoxLayout(pane, BoxLayout.X_AXIS));
                 pane.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
-                pane.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+                pane.setBorder(PAR_BORDER);
                 pane.add(new JLabel("Integer - " + name + ":"));
                 number = new JFormattedTextField(NumberFormat.getIntegerInstance());
                 number.setMinimumSize(new Dimension(60, 20));
@@ -186,7 +177,7 @@ public class ComponentFactory {
                 pane = new JPanel();
                 pane.setLayout(new BoxLayout(pane, BoxLayout.X_AXIS));
                 pane.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
-                pane.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+                pane.setBorder(PAR_BORDER);
                 pane.add(new JLabel("Long - " + name + ":"));
                 number = new JFormattedTextField(NumberFormat.getIntegerInstance());
                 number.setMinimumSize(new Dimension(60, 20));
@@ -221,7 +212,7 @@ public class ComponentFactory {
                 pane = new JPanel();
                 pane.setLayout(new BoxLayout(pane, BoxLayout.X_AXIS));
                 pane.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
-                pane.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+                pane.setBorder(PAR_BORDER);
                 pane.add(new JLabel("Float - " + name + ":"));
                 number = new JFormattedTextField(NumberFormat.getNumberInstance());
                 number.setMinimumSize(new Dimension(60, 20));
@@ -256,7 +247,7 @@ public class ComponentFactory {
                 pane = new JPanel();
                 pane.setLayout(new BoxLayout(pane, BoxLayout.X_AXIS));
                 pane.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
-                pane.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+                pane.setBorder(PAR_BORDER);
                 pane.add(new JLabel("Double - " + name + ":"));
                 number = new JFormattedTextField(NumberFormat.getNumberInstance());
                 number.setMinimumSize(new Dimension(60, 20));
@@ -290,9 +281,9 @@ public class ComponentFactory {
             {
                 pane = new JPanel();
                 pane.setLayout(new BoxLayout(pane, BoxLayout.X_AXIS));
-                pane.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
-                pane.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
-                pane.add(new JLabel("Double - " + name + ":"));
+                pane.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
+                pane.setBorder(PAR_BORDER);
+                pane.add(new JLabel("String - " + name + ":"));
                 string = new JTextField();
                 string.setMinimumSize(new Dimension(60, 20));
                 pane.add(Box.createRigidArea(new Dimension(12, 0)));

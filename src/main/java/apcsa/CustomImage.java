@@ -74,8 +74,16 @@ public class CustomImage extends SimpleImage {
         }
     }
 
+    public void string() {
+        System.out.println("Noargs!");
+    }
+
     public void string(String test) {
         System.out.println(test);
+    }
+
+    public void string(String str1, String str2, String str3) {
+
     }
 
     public void mirror() {

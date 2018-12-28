@@ -1,5 +1,6 @@
-package apcsa;
+package apcsa.gui;
 
+import apcsa.ImageNationFrame;
 import apcsa.fractal.FractalDialog;
 import javafx.application.Platform;
 import javafx.stage.FileChooser;
@@ -31,6 +32,7 @@ public class INMenuBar extends JMenuBar {
 
     private JMenu view;
     private JMenuItem center;
+    private JCheckBoxMenuItem overlay;
 
 
     public INMenuBar(ImageNationFrame frame) {
@@ -58,6 +60,7 @@ public class INMenuBar extends JMenuBar {
 
         view = new JMenu("View");
         center = new JMenuItem("Center Image");
+        overlay = new JCheckBoxMenuItem("Overlay", true);
     }
 
     private void construct() {
@@ -72,6 +75,7 @@ public class INMenuBar extends JMenuBar {
 
         this.add(view);
         view.add(center);
+        view.add(overlay);
 
     }
 
@@ -94,6 +98,8 @@ public class INMenuBar extends JMenuBar {
         view.setMnemonic(VK_V);
         center.setMnemonic(VK_C);
         center.setAccelerator(KeyStroke.getKeyStroke(VK_C, CTRL_DOWN_MASK | SHIFT_DOWN_MASK));
+        overlay.setMnemonic(VK_O);
+        overlay.setAccelerator(KeyStroke.getKeyStroke(VK_L, CTRL_DOWN_MASK));
 
     }
 
@@ -102,6 +108,12 @@ public class INMenuBar extends JMenuBar {
             @Override
             public void actionPerformed(ActionEvent e) {
                 frame.getImagePanel().centerImage();
+            }
+        });
+        overlay.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                frame.getImagePanel().setOverlay(overlay.getState());
             }
         });
         undo.addActionListener(new AbstractAction() {
