@@ -75,24 +75,25 @@ public class INMenuBar extends JMenuBar {
 
     }
 
+    @SuppressWarnings("Duplicates")
     private void addShortcuts() {
         file.setMnemonic(VK_F);
         newCanvas.setMnemonic(VK_N);
-        newCanvas.setAccelerator(KeyStroke.getKeyStroke(VK_N, CTRL_MASK));
+        newCanvas.setAccelerator(KeyStroke.getKeyStroke(VK_N, CTRL_DOWN_MASK));
         newFractal.setMnemonic(VK_F);
-        newFractal.setAccelerator(KeyStroke.getKeyStroke(VK_N, CTRL_MASK | SHIFT_MASK));
+        newFractal.setAccelerator(KeyStroke.getKeyStroke(VK_N, CTRL_DOWN_MASK | SHIFT_DOWN_MASK));
         saveAs.setMnemonic(VK_S);
-        saveAs.setAccelerator(KeyStroke.getKeyStroke(VK_S, CTRL_MASK));
+        saveAs.setAccelerator(KeyStroke.getKeyStroke(VK_S, CTRL_DOWN_MASK));
 
         edit.setMnemonic(VK_E);
         undo.setMnemonic(VK_U);
-        undo.setAccelerator(KeyStroke.getKeyStroke(VK_Z, CTRL_MASK));
+        undo.setAccelerator(KeyStroke.getKeyStroke(VK_Z, CTRL_DOWN_MASK));
         redo.setMnemonic(VK_R);
-        redo.setAccelerator(KeyStroke.getKeyStroke(VK_Z, CTRL_MASK | SHIFT_MASK));
+        redo.setAccelerator(KeyStroke.getKeyStroke(VK_Z, CTRL_DOWN_MASK | SHIFT_DOWN_MASK));
 
         view.setMnemonic(VK_V);
         center.setMnemonic(VK_C);
-        center.setAccelerator(KeyStroke.getKeyStroke(VK_C, CTRL_MASK | SHIFT_MASK));
+        center.setAccelerator(KeyStroke.getKeyStroke(VK_C, CTRL_DOWN_MASK | SHIFT_DOWN_MASK));
 
     }
 
